@@ -1,0 +1,34 @@
+import tensorflow as tf
+import numpy as np
+from tensorflow import keras
+from tensorflow.keras.preprocessing.text import Tokenizer
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+
+questions = ["안녕", "뭐해?", "오늘 날씨 어때?", "무엇이든 물어봐!"]
+answers = ["안녕!", "일하고 있어.", "매우 화창해요.", "당신이 더 무엇을 알고 싶어하나요?"]
+
+tokenizer = Tokenizer()
+tokenizer.fit_on_texts(questions)
+total_words = len(tokenizer.word_index) + 1
+
+input_sequences = tokenizer.texts_to_sequences(questions)
+input_sequences = pad_sequences(input_sequences)
+
+model = keras.Sequential()
+model.add(keras.layers.Embedding(total_words, 100, input_length=len(input_sequences[0]))
+model.add(keras.layers.LSTM(100))
+model.add(keras.layers.Dense(total_words, activation='
+
+model.compile(loss='categorical_crossentropy', optimizer='adam')
+
+model.fit(input_sequences, answers, epochs=100)
+model.save("modelv1")
+while True:
+    user_input = input("You: ")
+    if user_input.lower() == "그만":
+        break
+    input_sequence = tokenizer.texts_to_sequences([user_input])
+    input_sequence = pad_sequences(input_sequence, maxlen=len(input_sequences[0]))
+    predicted_word_index = np.argmax(model.predict(input_sequence), axis=-1)
+    response = [word for word, index in tokenizer.word_index.items() if index == predicted_word_index]
+    print("ChatBot:", " ".join(response))
